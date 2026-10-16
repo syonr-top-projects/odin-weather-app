@@ -3,11 +3,46 @@ import { parse, format } from "date-fns";
 
 const app = document.getElementById('app');
 
+// F/C Button
+
+function tempSwitch(csp, country) {
+    const switchSpan = document.createElement('span');
+    const fahrenheit = document.createElement('button');
+    fahrenheit.textContent = 'F';
+    const celsius = document.createElement('button');
+    celsius.textContent = 'C';
+    let unit; 
+
+    fahrenheit.addEventListener('click', async () => {
+        unit = 'us';
+        const data = await getData(csp, country, unit);
+        toggleDisplay(data, csp, country);
+    });
+
+    celsius.addEventListener('click', async () => {
+        unit = 'metric';
+        const data = await getData(csp, country, unit);
+        toggleDisplay(data, csp, country);
+    });
+
+    switchSpan.appendChild(fahrenheit);
+    switchSpan.appendChild(celsius);
+
+    return switchSpan;
+}
+
 // Display
 
-function toggleDisplay(data) {
+function toggleDisplay(data, csp, country) {
+
+    if (document.getElementById('display-container')) {
+        console.log('the display container is already here');
+        app.removeChild(document.getElementById('display-container'));
+    }
+
     const displayDiv = document.createElement('div');
-    displayDiv.className = 'grid-container';
+    displayDiv.id = 'display-container';
+    console.log('created new display container');
 
     const locationDiv = document.createElement('div');
     locationDiv.textContent = data.resolvedAddress;
@@ -31,6 +66,10 @@ function toggleDisplay(data) {
     temp.textContent = data.days[0].temp;
     const hiLo = document.createElement('div');
     hiLo.textContent = `${data.days[0].tempmax}/${data.days[0].tempmin}`;
+
+    const toggleUnit = tempSwitch(csp, country);
+
+    displayDiv.appendChild(toggleUnit);
 
     displayDiv.appendChild(locationDiv);
     displayDiv.appendChild(timeDiv);
@@ -75,14 +114,12 @@ function createForm() {
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const formData = new FormData(event.target);
-        const data = await getData(formData.get('csp'), formData.get('country'));
+        const csp = formData.get('csp');
+        const country = formData.get('country');
+        const data = await getData(csp, country);
         console.log(data);
-        toggleDisplay(data); // how to not add more and replace
+        toggleDisplay(data, csp, country); // how to not add more and replace
     })
 }
 
-// F/C Button
-
-function tempSwitch() {
-    
-}
+createForm(); 
