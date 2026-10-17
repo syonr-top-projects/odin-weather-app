@@ -1,5 +1,6 @@
 import { getData } from "./api.js";
 import { parse, format } from "date-fns";
+import './styles.css';
 
 const app = document.getElementById('app');
 
@@ -87,15 +88,16 @@ function createForm() {
 
     const cSPDiv = document.createElement('div');
     const cSPLabel = document.createElement('label');
-    cSPLabel.textContent = 'City/State/Province';
+    cSPLabel.textContent = 'City/State/Province: ';
     const cSPInput = document.createElement('input');
     cSPInput.name = 'csp';
+    cSPInput.required = true;
     cSPDiv.appendChild(cSPLabel);
     cSPDiv.appendChild(cSPInput);
 
     const countryDiv = document.createElement('div');
     const countryLabel = document.createElement('label');
-    countryLabel.textContent = 'Country';
+    countryLabel.textContent = 'Country: ';
     const countryInput = document.createElement('input');
     countryInput.name = 'country';
     countryDiv.appendChild(countryLabel);
@@ -118,7 +120,7 @@ function createForm() {
         const country = formData.get('country');
         const data = await getData(csp, country);
         console.log(data);
-        toggleDisplay(data, csp, country); // how to not add more and replace
+        toggleDisplay(data, csp, country); 
     })
 }
 
