@@ -1,8 +1,10 @@
 import { getData } from "./api.js";
 import { parse, format } from "date-fns";
+import { weatherThemes } from "./weatherThemes.js";
 import './styles.css';
 
 const app = document.getElementById('app');
+const body = document.querySelector('body');
 
 // F/C Button
 
@@ -17,13 +19,13 @@ function tempSwitch(csp, country) {
     fahrenheit.addEventListener('click', async () => {
         unit = 'us';
         const data = await getData(csp, country, unit);
-        toggleDisplay(data, csp, country);
+        toggleDisplay(data, csp, country, 'F');
     });
 
     celsius.addEventListener('click', async () => {
         unit = 'metric';
         const data = await getData(csp, country, unit);
-        toggleDisplay(data, csp, country);
+        toggleDisplay(data, csp, country, 'C');
     });
 
     switchSpan.appendChild(fahrenheit);
@@ -34,16 +36,14 @@ function tempSwitch(csp, country) {
 
 // Display
 
-function toggleDisplay(data, csp, country) {
+function toggleDisplay(data, csp, country, unit) {
 
     if (document.getElementById('display-container')) {
-        console.log('the display container is already here');
         app.removeChild(document.getElementById('display-container'));
     }
 
     const displayDiv = document.createElement('div');
     displayDiv.id = 'display-container';
-    console.log('created new display container');
 
     const locationDiv = document.createElement('div');
     locationDiv.textContent = data.resolvedAddress;
@@ -54,6 +54,9 @@ function toggleDisplay(data, csp, country) {
     timeDiv.className = 'grid-item';
 
     const iconId = data.currentConditions.icon;
+    const theme = weatherThemes[iconId] ?? weatherThemes.cloudy;
+    body.style.backgroundColor = theme.color;
+    body.style.backgroundImage = theme.gradient;
 
     import(`../weather-icons/${iconId}.svg`).then((response) => {
         const iconDiv = document.createElement('img');
@@ -61,22 +64,20 @@ function toggleDisplay(data, csp, country) {
         iconDiv.alt = iconId;
 
         displayDiv.appendChild(iconDiv);
+        displayDiv.appendChild(timeDiv);
+        displayDiv.appendChild(temp);
+        displayDiv.appendChild(toggleUnit);
+        displayDiv.appendChild(hiLo);
     })
 
     const temp = document.createElement('div');
-    temp.textContent = data.days[0].temp;
+    temp.textContent = `${data.days[0].temp}°${unit}`;
     const hiLo = document.createElement('div');
-    hiLo.textContent = `${data.days[0].tempmax}/${data.days[0].tempmin}`;
+    hiLo.textContent = `${data.days[0].tempmax}°${unit}/${data.days[0].tempmin}°${unit}`;
 
     const toggleUnit = tempSwitch(csp, country);
 
-    displayDiv.appendChild(toggleUnit);
-
     displayDiv.appendChild(locationDiv);
-    displayDiv.appendChild(timeDiv);
-
-    displayDiv.appendChild(temp);
-    displayDiv.appendChild(hiLo);
 
     app.appendChild(displayDiv);
 }
@@ -120,7 +121,7 @@ function createForm() {
         const country = formData.get('country');
         const data = await getData(csp, country);
         console.log(data);
-        toggleDisplay(data, csp, country); 
+        toggleDisplay(data, csp, country, 'F'); 
     })
 }
 
